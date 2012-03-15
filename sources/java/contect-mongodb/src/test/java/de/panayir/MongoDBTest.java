@@ -1,13 +1,11 @@
 package de.panayir;
 
-import javax.swing.plaf.basic.BasicOptionPaneUI;
-import java.net.UnknownHostException;
 import java.text.DateFormat;
-import java.text.ParseException;
-import java.util.Random;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
@@ -25,7 +23,7 @@ public class MongoDBTest {
     private Mongo mongo;
     
     @Before
-    public void setup() throws UnknownHostException {
+    public void setup() throws Exception {
         mongo = new Mongo("127.0.0.1", 27017);
     }
 
@@ -33,7 +31,7 @@ public class MongoDBTest {
     public void saveAndReadPerson() throws Exception {
         DBObject person = createPerson();
 
-        DBCollection col = mongo.getDB("test").getCollection("person");
+        DBCollection col = getCol();
         col.save(person);
 
         Object id = person.get("_id");
@@ -43,7 +41,21 @@ public class MongoDBTest {
         Assert.assertTrue(id.equals(dbo.get("_id")));
     }
 
-    private DBObject createPerson() throws ParseException {
+    @Test
+    public void savePersonWithHomepage() throws Exception {
+        DBObject person = createPerson();
+
+        DBObject homepage = BasicDBObjectBuilder.start("url", "http://www.google.com")
+                .add("desc", "a search engine to find stuff on the web").get();
+
+        BasicDBList hl = new BasicDBList();
+        hl.add(homepage);
+        person.put("homepage", hl);
+
+        getCol().save(person);
+    }
+
+    private DBObject createPerson() throws Exception {
         int i = (int) Math.random() * 10000;
         int d = (int) Math.random() * 30;
 
@@ -52,5 +64,9 @@ public class MongoDBTest {
         return BasicDBObjectBuilder.start("lastname", p.getName())
                 .add("firstname", p.getFirstName()).add("gender", p.getGender().ordinal())
                 .add("date", p.getDateOfBirth()).get();
+    }
+
+    private DBCollection getCol() {
+        return mongo.getDB("test").getCollection("person");
     }
 }
