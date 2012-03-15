@@ -11,7 +11,9 @@ import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import de.panayir.contect.Gender;
 import de.panayir.contect.Person;
-import org.junit.Assert;
+import static org.junit.Assert.*;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,44 +22,62 @@ import org.junit.Test;
  */
 public class MongoDBTest {
 
+    private final static String ID = "_id";
+    
     private Mongo mongo;
     
     @Before
     public void setup() throws Exception {
         mongo = new Mongo("127.0.0.1", 27017);
     }
+    
+    @After
+    public void tearDown() {
+        mongo.getDB("test").dropDatabase();
+    }
 
     @Test
     public void saveAndReadPerson() throws Exception {
         DBObject person = createPerson();
+        getCol().save(person);
 
-        DBCollection col = getCol();
-        col.save(person);
+        Object id = person.get(ID);
+        assertNotNull(id);
 
-        Object id = person.get("_id");
-        Assert.assertNotNull(id);
-
-        DBObject dbo = col.findOne(new BasicDBObject("_id", id));
-        Assert.assertTrue(id.equals(dbo.get("_id")));
+        DBObject dbo = getCol().findOne(new BasicDBObject(ID, id));
+        assertTrue(id.equals(dbo.get(ID)));
     }
 
     @Test
     public void savePersonWithHomepage() throws Exception {
         DBObject person = createPerson();
-
-        DBObject homepage = BasicDBObjectBuilder.start("url", "http://www.google.com")
-                .add("desc", "a search engine to find stuff on the web").get();
-
         BasicDBList hl = new BasicDBList();
-        hl.add(homepage);
+        hl.add(BasicDBObjectBuilder.start("url", "http://www.google.com")
+                .add("desc", "a search engine to find stuff on the web").get());
+        hl.add(BasicDBObjectBuilder.start("url", "http://www.mongodb.org")
+                .add("desc", "a document database").get());
         person.put("homepage", hl);
 
         getCol().save(person);
+
+        DBObject dbo = getCol().findOne(new BasicDBObject(ID, person.get(ID)));
+        BasicDBList l = (BasicDBList) dbo.get("homepage");
+        DBObject g = (DBObject) l.get("0");
+        DBObject m = (DBObject) l.get("1");
+
+        assertEquals(2, l.size());
+        assertEquals("http://www.google.com", g.get("url"));
+        assertEquals("http://www.mongodb.org", m.get("url"));
+    }
+    
+    @Test
+    public void saveWithIM() {
+
     }
 
     private DBObject createPerson() throws Exception {
-        int i = (int) Math.random() * 10000;
-        int d = (int) Math.random() * 30;
+        int i = (int) (Math.random() * 10000);
+        int d = (int) (Math.random() * 30);
 
         Person p = new Person("Hank" + i, "Moody" + i, Gender.MALE, DateFormat.getDateInstance().parse(d + ".01.1981"));
 
