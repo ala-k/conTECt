@@ -10,6 +10,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import de.panayir.contect.Gender;
+import de.panayir.contect.IMType;
 import de.panayir.contect.Person;
 import static org.junit.Assert.*;
 
@@ -56,12 +57,12 @@ public class MongoDBTest {
                 .add("desc", "a search engine to find stuff on the web").get());
         hl.add(BasicDBObjectBuilder.start("url", "http://www.mongodb.org")
                 .add("desc", "a document database").get());
-        person.put("homepage", hl);
+        person.put("homepages", hl);
 
         getCol().save(person);
 
         DBObject dbo = getCol().findOne(new BasicDBObject(ID, person.get(ID)));
-        BasicDBList l = (BasicDBList) dbo.get("homepage");
+        BasicDBList l = (BasicDBList) dbo.get("homepages");
         DBObject g = (DBObject) l.get("0");
         DBObject m = (DBObject) l.get("1");
 
@@ -71,8 +72,27 @@ public class MongoDBTest {
     }
     
     @Test
-    public void saveWithIM() {
+    public void saveWithIM() throws Exception {
+        DBObject person = createPerson();
+        BasicDBList hl = new BasicDBList();
+        hl.add(BasicDBObjectBuilder.start("username", "myAIM")
+                .add("desc", "simple messaging")
+                .add("protocol", IMType.AIM.name()).get());
+        hl.add(BasicDBObjectBuilder.start("username", "myMSN")
+                .add("desc", "a document database")
+                .add("protocol", IMType.MSN.name()).get());
+        person.put("instantmsgs", hl);
 
+        getCol().save(person);
+
+        DBObject dbo = getCol().findOne(new BasicDBObject(ID, person.get(ID)));
+        BasicDBList l = (BasicDBList) dbo.get("instantmsgs");
+        DBObject g = (DBObject) l.get("0");
+        DBObject m = (DBObject) l.get("1");
+
+        assertEquals(2, l.size());
+        assertEquals(IMType.AIM.name(), g.get("protocol"));
+        assertEquals(IMType.MSN.name(), m.get("protocol"));
     }
 
     private DBObject createPerson() throws Exception {

@@ -1,30 +1,14 @@
-package de.panayir.contakt;
-
-import java.util.Date;
-import java.util.List;
+package de.panayir.contect;
 
 import org.joda.time.DateMidnight;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.panayir.contect.Address;
-import de.panayir.contect.Email;
-import de.panayir.contect.Gender;
-import de.panayir.contect.Homepage;
-import de.panayir.contect.Note;
-import de.panayir.contect.PartyRelationship;
-import de.panayir.contect.PartyRole;
-import de.panayir.contect.Person;
-import de.panayir.contect.Telephone;
-
 import static org.joda.time.DateMidnight.parse;
 import static org.joda.time.DateTime.now;
-import static org.junit.Assert.*;
 
 /**
  *
