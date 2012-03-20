@@ -1,4 +1,4 @@
-package de.panayir;
+package de.panayir.mongodb;
 
 import java.text.DateFormat;
 
