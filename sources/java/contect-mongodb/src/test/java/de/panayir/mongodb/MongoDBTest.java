@@ -1,4 +1,4 @@
-package de.panayir;
+package de.panayir.mongodb;
 
 import java.text.DateFormat;
 
@@ -93,6 +93,30 @@ public class MongoDBTest {
         assertEquals(2, l.size());
         assertEquals(IMType.AIM.name(), g.get("protocol"));
         assertEquals(IMType.MSN.name(), m.get("protocol"));
+    }
+    
+    @Test
+    public void saveWithAddress() throws Exception {
+        DBObject person = createPerson();
+        BasicDBList hl = new BasicDBList();
+        hl.add(BasicDBObjectBuilder.start("street", "Kampstr")
+                .add("nr", "30")
+                .add("zip", "44135")
+                .add("city", "Dortmund")
+                .add("country", "Germany").get());
+        person.put("addresses", hl);
+
+        getCol().save(person);
+
+        DBObject dbo = getCol().findOne(new BasicDBObject(ID, person.get(ID)));
+        BasicDBList l = (BasicDBList) dbo.get("addresses");
+        DBObject g = (DBObject) l.get("0");
+        
+        assertEquals(1, l.size());
+        assertEquals("Kampstr", g.get("street"));
+        assertEquals("30", g.get("nr"));
+        assertEquals("44135", g.get("zip"));
+        assertEquals("Dortmund", g.get("city"));
     }
 
     private DBObject createPerson() throws Exception {
